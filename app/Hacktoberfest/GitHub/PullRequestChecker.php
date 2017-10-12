@@ -137,6 +137,13 @@ class PullRequestChecker
      */
     public function getQualifiedPullRequests($user)
     {
+
+        $cacheKey = 'user_' . $user->github_username;
+
+        if ($this->cache->has($cacheKey)) {
+            return $this->cache->get($cacheKey);
+        }
+
         $response = $this->getClient()->request('GET', self::API_ENDPOINT_SEARCH, [
             'query' => $this->getQuery($user->github_username),
             'headers' => [
@@ -155,6 +162,7 @@ class PullRequestChecker
             }
         }
 
+        $this->cache->put($cacheKey, $prs, 1);
         return $prs;
     }
 }
